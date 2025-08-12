@@ -119,25 +119,4 @@ The workflow:
 
 ---
 
-## For JuliaCon Proceedings (JCON)
 
-If you are preparing a JCON paper, place `paper.tex`, `paper.yml`, and `ref.bib` in a `paper/` folder and follow the Author’s Guide. (Proceedings complement accepted talks/posters with concise, citable write-ups.)
-
----
-
-## Citing this work
-
-Consider adding a `CITATION.cff` (rendered by GitHub on your repo homepage) so others can cite the software/paper accurately.
-
-Example:
-```yaml
-cff-version: 1.2.0
-message: "If you use Tumor-UDE, please cite it."
-title: "Tumor-UDE: Physics-Informed & Pure-Mechanistic UDEs for Tumor–Immune Dynamics"
-authors:
-  - family-names: YourLast
-    given-names: YourFirst
-version: 0.1.0
-date-released: 2025-08-12
-type: software
-```
