@@ -1,28 +1,27 @@
 # test/runtests.jl
 using Test, Random
 
-# --- (Quick path) Ensure deps exist even if no Project.toml is set up ---
+# --- Bootstrap deps on CI (no Project.toml needed) ---
 import Pkg
 Pkg.activate(temp=true)
 Pkg.add([
     "CSV","DataFrames","Dates","Printf",
-    "Flux","DiffEqFlux","Optimization","OptimizationOptimisers",
-    "OrdinaryDiffEq","SciMLSensitivity","Zygote",
-    "LinearAlgebra","Statistics","Random","Distributions",
-    "Interpolations","Dierckx"
+    "Flux","DiffEqFlux","Optimization","OptimizationOptimisers","OptimizationOptimJL",
+    "OrdinaryDiffEq","SciMLSensitivity","Zygote","SciMLBase",
+    "Plots","StatsPlots","Measures","ColorSchemes",
+    "Functors","Dierckx","Interpolations","Distributions"
 ])
 
 using CSV, DataFrames
 
-# Include your script without executing main (thanks to the guard you added)
+# Include your script without running main() thanks to the guard you added
 include(joinpath(@__DIR__, "..", "src", "JuliaconSubmission.jl"))
 
-# --- Create tiny synthetic CSVs in temp files ---
+# --- tiny helper to generate minimal CSVs for tests ---
 function _tiny_paths()
     time_io = tempname()*"_time.csv"
     imm_io  = tempname()*"_immune.csv"
 
-    # time file with headers (the script renames them)
     df_time = DataFrame(
         KineticID = ["C1","C1","C1"],
         TumorID   = ["T1","T1","T1"],
@@ -32,9 +31,8 @@ function _tiny_paths()
     )
     CSV.write(time_io, df_time)
 
-    # immune file WITHOUT header (your loader uses header=false)
+    # immune CSV is headerless in your loader
     open(imm_io, "w") do io
-        # TumorVolume, ImmuneCellFraction
         write(io, "80,0.20\n100,0.22\n120,0.24\n140,0.26\n")
     end
     return time_io, imm_io
@@ -66,7 +64,6 @@ end
     L = compute_enhanced_loss(θ0, groups, re_imm, re_corr, netsz, tmin, tmax)
     @test isfinite(L)
 
-    # Quick solve & predict on group 1
     t_pred, v_pred = predict_group(groups[1], 1, θ0, groups, re_imm, re_corr, netsz, tmin, tmax; dense_time_points=10)
     @test length(t_pred) == length(v_pred) > 0
     @test !any(isnan, v_pred)
