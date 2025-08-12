@@ -1,0 +1,10 @@
+# results & figures
+results/
+enhanced_results_*/
+*.png
+*.pdf
+*.svg
+
+# Julia artifacts (if you ever add a local env)
+*.ji
+.DS_Store
