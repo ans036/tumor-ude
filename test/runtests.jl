@@ -15,7 +15,7 @@ Pkg.add([
 using CSV, DataFrames
 
 # Include your script without executing main (thanks to the guard you added)
-include(joinpath(@__DIR__, "..", "JuliaconSubmission.jl"))
+include(joinpath(@__DIR__, "..", "src", "JuliaconSubmission.jl"))
 
 # --- Create tiny synthetic CSVs in temp files ---
 function _tiny_paths()
