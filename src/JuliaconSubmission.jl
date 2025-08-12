@@ -5,6 +5,7 @@
 # Enhanced Model Expressiveness and Robust Optimization
 ################################################################################
 
+
 using CSV, DataFrames, Dates, Printf
 using Flux, DiffEqFlux, Optimization, OptimizationOptimisers
 using OrdinaryDiffEq, SciMLSensitivity, Zygote
@@ -17,6 +18,7 @@ using Dierckx
 using Interpolations
 using Interpolations: scale, extrapolate, CubicSplineInterpolation
 using Distributions
+using SciMLBase        
 ################################################################################
 # 0. ENHANCED Configuration & Constants
 ################################################################################
