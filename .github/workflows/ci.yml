@@ -8,25 +8,38 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [classic, pure]  # classic = test/runtests.jl; pure = test/pure_mechanistic_tests.jl
     steps:
       - uses: actions/checkout@v4
+
       - uses: julia-actions/setup-julia@v2
         with:
           version: '1'
+
       - uses: julia-actions/cache@v2
 
-      - name: Run tests
-        run: julia --color=yes test/runtests.jl
+      - name: Run tests (${{ matrix.target }})
+        run: |
+          if [ "${{ matrix.target }}" = "classic" ]; then
+            julia --color=yes test/runtests.jl
+          else
+            julia --color=yes test/pure_mechanistic_tests.jl
+          fi
 
       # Upload plots/zip even if tests fail
-      - name: Upload visualization artifacts
+      - name: Upload visualization artifacts (${{ matrix.target }})
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: visualizations-${{ github.run_number }}
+          # unique per matrix job; v4 doesn't allow multiple uploads to the same name in one run
+          name: vis-${{ matrix.target }}-${{ github.run_number }}
           path: |
             enhanced_results_*.zip
             enhanced_results_*/**/*
             results/**/*
+            results_PureMechanisticUDE_*.zip
+            results_PureMechanisticUDE_*/**/*
           retention-days: 14
           compression-level: 0
