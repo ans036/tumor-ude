@@ -12,13 +12,13 @@ using OrdinaryDiffEq, SciMLSensitivity, Zygote
 using Plots, StatsPlots, Measures, ColorSchemes
 using LinearAlgebra, Statistics, Random
 using Flux: Chain, Dense, relu, tanh, sigmoid, destructure, f64, selu, softplus, swish, LayerNorm
-using Functors:  @functor
+using Functors: @functor
 using OptimizationOptimJL
 using Dierckx
 using Interpolations
 using Interpolations: scale, extrapolate, CubicSplineInterpolation
-using Distributions
-using SciMLBase        
+using Distributions: Uniform            # << avoid Distributions.scale conflict
+using SciMLBase                         # << for successful_retcode etc. 
 ################################################################################
 # 0. ENHANCED Configuration & Constants
 ################################################################################
@@ -69,46 +69,52 @@ const N_RANDOM_RESTARTS = 3      # Multiple initialization attempts
 function load_and_merge_data(time_file::String, immune_file::String)
     df_time = CSV.read(time_file, DataFrame; header=1)
     rename!(df_time, [:KineticID, :TumorID, :Time, :TumorVolume, :ImmuneCellCount])
-    
+
     df_im = CSV.read(immune_file, DataFrame; header=false)
     rename!(df_im, [:TumorVolume, :ImmuneCellFraction])
-    
+
     for col in [:Time, :TumorVolume, :ImmuneCellCount]
         df_time[!, col] = Float64.(df_time[!, col])
     end
     for col in [:TumorVolume, :ImmuneCellFraction]
         df_im[!, col] = Float64.(df_im[!, col])
     end
-    
+
     df_time = unique(df_time)
-    df_im = unique(df_im)
+    df_im   = unique(df_im)
     dropmissing!(df_time)
     dropmissing!(df_im)
-    
-    # ENHANCED: Remove extreme outliers
-    volume_q99 = quantile(df_time.TumorVolume, 0.99)
-    volume_q01 = quantile(df_time.TumorVolume, 0.01)
-    df_time = df_time[(df_time.TumorVolume .>= volume_q01) .& (df_time.TumorVolume .<= volume_q99), :]
-    
+
+    # Robust: only trim extremes when we have a reasonable sample
+    if nrow(df_time) >= 10
+        q01 = quantile(df_time.TumorVolume, 0.01)
+        q99 = quantile(df_time.TumorVolume, 0.99)
+        df_time = df_time[(df_time.TumorVolume .>= q01) .& (df_time.TumorVolume .<= q99), :]
+    end
+    # Note: quantiles on very small n can exclude endpoints by interpolation; we avoid that. :contentReference[oaicite:3]{index=3}
+
+    # Nearest-lookup immune fraction (sorted, unique times)
     df_im_sorted = sort(df_im, :TumorVolume)
-    immune_fractions = Vector{Float64}(undef, nrow(df_time))
-    
+    immune_fractions = similar(df_time.TumorVolume)
     for (i, vol) in enumerate(df_time.TumorVolume)
         idx = argmin(abs.(df_im_sorted.TumorVolume .- vol))
         immune_fractions[i] = df_im_sorted.ImmuneCellFraction[idx]
     end
-    
     df_time.ImmuneCellFraction = immune_fractions
-    
-    # ENHANCED: Better normalization
-    volume_std = std(df_time.TumorVolume)
+
+    # Safe normalization: use population std (corrected=false); clamp to epsilon if degenerate
     volume_mean = mean(df_time.TumorVolume)
+    volume_std  = std(df_time.TumorVolume; corrected=false)  # n-scaling; defined for n=1
+    if !isfinite(volume_std) || volume_std <= 0
+        volume_std = 1.0  # avoid division by 0/NaN for tiny samples
+    end
     df_time.VolumeNorm = (df_time.TumorVolume .- volume_mean) ./ volume_std
-    df_time.VolumeNorm = df_time.VolumeNorm .+ abs(minimum(df_time.VolumeNorm)) .+ 0.1  # Ensure positive
-    
+    df_time.VolumeNorm = df_time.VolumeNorm .+ abs(minimum(df_time.VolumeNorm)) .+ 0.1
+
     println("📊 Loaded $(nrow(df_time)) measurements across $(length(unique(df_time.KineticID))) kinetics")
     return df_time, volume_mean, volume_std
 end
+
 
 ################################################################################
 # 2. ENHANCED Group Data Structure
@@ -291,7 +297,7 @@ struct EnhancedResBlock{F}
     dropout_rate::Float64
 end
 
-Flux.@functor EnhancedResBlock
+Functors.@functor EnhancedResBlock
 
 function EnhancedResBlock(dim::Int; activation=swish, dropout_rate=0.1)
     EnhancedResBlock(
@@ -1191,7 +1197,7 @@ end
 # 11. Run Enhanced Pipeline
 ################################################################################
 
-if abspath(PROGRAM_FILE) == @__FILE__   # run only when executed as a script
+if abspath(PROGRAM_FILE) == @__FILE__
     θ_final, losses, groups, re_immune, re_corr, net_sizes, t_min, t_max = main(
         time_file="C:\\tubai\\Downloads\\tumor_time_to_event_data.csv",
         immune_file="C:\\tubai\\Downloads\\tumor_volume_vs_Im_cells_rate.csv",
