@@ -8,9 +8,6 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ${{ github.workspace }}   # repo root
     steps:
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v2
@@ -21,6 +18,7 @@ jobs:
       - name: Run tests
         run: julia --color=yes test/runtests.jl
 
+      # Upload plots/zip even if tests fail
       - name: Upload visualization artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
