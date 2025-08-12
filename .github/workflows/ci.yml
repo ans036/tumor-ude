@@ -8,11 +8,27 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}   # repo root
     steps:
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v2
         with:
-          version: '1'      # latest stable Julia
+          version: '1'
       - uses: julia-actions/cache@v2
+
       - name: Run tests
         run: julia --color=yes test/runtests.jl
+
+      - name: Upload visualization artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: visualizations-${{ github.run_number }}
+          path: |
+            enhanced_results_*.zip
+            enhanced_results_*/**/*
+            results/**/*
+          retention-days: 14
+          compression-level: 0
