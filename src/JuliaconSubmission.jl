@@ -1189,9 +1189,10 @@ end
 # 11. Run Enhanced Pipeline
 ################################################################################
 
-# Execute enhanced pipeline
-θ_final, losses, groups, re_immune, re_corr, net_sizes, t_min, t_max = main(
-    time_file="C:\\tubai\\Downloads\\tumor_time_to_event_data.csv",
-    immune_file="C:\\tubai\\Downloads\\tumor_volume_vs_Im_cells_rate.csv",
-    save_plots=true
-)
+if abspath(PROGRAM_FILE) == @__FILE__
+    θ_final, losses, groups, re_immune, re_corr, net_sizes, t_min, t_max = main(
+        time_file="C:\\tubai\\Downloads\\tumor_time_to_event_data.csv",
+        immune_file="C:\\tubai\\Downloads\\tumor_volume_vs_Im_cells_rate.csv",
+        save_plots=true
+    )
+end
