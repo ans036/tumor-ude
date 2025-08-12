@@ -1191,10 +1191,11 @@ end
 # 11. Run Enhanced Pipeline
 ################################################################################
 
-if abspath(PROGRAM_FILE) == @__FILE__
+if abspath(PROGRAM_FILE) == @__FILE__   # run only when executed as a script
     θ_final, losses, groups, re_immune, re_corr, net_sizes, t_min, t_max = main(
         time_file="C:\\tubai\\Downloads\\tumor_time_to_event_data.csv",
         immune_file="C:\\tubai\\Downloads\\tumor_volume_vs_Im_cells_rate.csv",
         save_plots=true
     )
 end
+
