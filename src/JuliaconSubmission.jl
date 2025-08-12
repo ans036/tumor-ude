@@ -12,13 +12,13 @@ using OrdinaryDiffEq, SciMLSensitivity, Zygote
 using Plots, StatsPlots, Measures, ColorSchemes
 using LinearAlgebra, Statistics, Random
 using Flux: Chain, Dense, relu, tanh, sigmoid, destructure, f64, selu, softplus, swish, LayerNorm
-using Functors: @functor
+using Functors                     # <= bring module name into scope
 using OptimizationOptimJL
 using Dierckx
 using Interpolations
 using Interpolations: scale, extrapolate, CubicSplineInterpolation
-using Distributions: Uniform            # << avoid Distributions.scale conflict
-using SciMLBase                         # << for successful_retcode etc. 
+using Distributions: Uniform       
+using SciMLBase
 ################################################################################
 # 0. ENHANCED Configuration & Constants
 ################################################################################
