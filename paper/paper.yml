@@ -1,0 +1,32 @@
+title: "Biologically Consistent Universal Differential Equations for Tumor–Immune Dynamics: A Comparative Study of Dual-Network Hybrid and Pure Mechanistic Approaches"
+authors:
+  - name: "Anish Sarkar"
+    affiliation: 1
+    orcid: "0009-0009-7965-7788"
+affiliations:
+  - name: "Netaji Subhash Engineering College, (MAKAUT)"
+    index: 1
+keywords:
+  - Universal Differential Equations
+  - Scientific Machine Learning
+  - Neural ODEs
+  - Physics-Informed Neural Networks
+  - Tumor–Immune Dynamics
+  - Gompertz Growth
+  - Michaelis–Menten Kinetics
+  - Julia
+  - SciML
+  - Biological Constraints
+  - Clinical Oncology
+bibliography: ref.bib
+# Optional metadata JuliaCon supports (safe to keep):
+github: "https://github.com/ans036/tumor-ude"
+tags:
+  - julia
+  - machine-learning
+  - scientific-ml
+  - oncology
+  - differential-equations
+  - neural-networks
+  - physics-informed
+  - computational-biology
